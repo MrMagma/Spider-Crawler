@@ -2,8 +2,6 @@ import os, sys
 
 import urllib.request
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
 from WebPage import WebPage
 
 class SpiderCrawler(object):
