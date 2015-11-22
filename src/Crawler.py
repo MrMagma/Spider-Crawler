@@ -15,19 +15,21 @@ def genMapUrlFn(baseUrl):
     return mapUrl
 
 class SpiderCrawler(object):
-    def __init__(self, url, layers = 1):
+    def __init__(self, url, layers = 1, output = None):
         self.startUrl = url
         self.layers = layers
-        self.pages = []
         self.crawled = []
-        self.notCrawled = [url]
+        self.notCrawled = [(url, "START")]
+        if output is not None:
+            self.output = open(output, "a")
+            self.output.write("[\n")
     def crawl(self, layers = None):
         if layers is None:
             layers = self.layers
         if layers > 0:
             crawlThese = self.notCrawled
             self.notCrawled = []
-            for link in crawlThese:
+            for link, cameFrom in crawlThese:
                 self.crawled.append(link)
                 print("Crawling: " + link)
                 try:
@@ -37,8 +39,19 @@ class SpiderCrawler(object):
                     pass
                     continue
                 page = WebPage(response, filterUrl, genMapUrlFn(link))
-                self.pages.append(page)
+                jsonLinks = "[\n"
                 for toCrawl in page.links:
+                    jsonLinks += ("    " * 3) + "\"" + toCrawl + "\",\n"
                     if toCrawl not in self.crawled:
-                        self.notCrawled.append(toCrawl)
+                        self.notCrawled.append((toCrawl, link))
+                jsonLinks += ("    " * 2) + "]"
+                if hasattr(self, "output"):
+                    json = ("    " * 1) + "{\n" + ("    " * 2) + "\"url\": \"" + link + "\",\n" + ("    " * 2)
+                    json += "\"leadsTo\": " + jsonLinks + ",\n" + ("    " * 2) + "\"cameFrom\": \"" + cameFrom + "\"\n" + ("    " * 1) + "},"
+                    self.output.write(json)
+                    self.output.write("\n")
             self.crawl(layers - 1)
+            if hasattr(self, "close"):
+                self.output.write("\n]")
+                self.output.close()
+                
