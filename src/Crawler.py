@@ -51,7 +51,7 @@ class SpiderCrawler(object):
                     self.output.write(json)
                     self.output.write("\n")
             self.crawl(layers - 1)
-            if hasattr(self, "close"):
-                self.output.write("\n]")
+            if layers == self.layers and hasattr(self, "output"):
+                self.output.write("]")
                 self.output.close()
                 
