@@ -16,12 +16,29 @@ def genMapUrlFn(baseUrl):
 
 class SpiderCrawler(object):
     def __init__(self, url, layers = 1):
-        self.url = url
+        self.startUrl = url
         self.layers = layers
         self.pages = []
-    def start(self):
-        response = urllib.request.urlopen(self.url)
-        page = WebPage(response.read(), filterUrl = filterUrl, mapUrl = genMapUrlFn(self.url))
-        for link in page.links:
-            print(link)
-        self.pages.append(page)
+        self.crawled = []
+        self.notCrawled = [url]
+    def crawl(self, layers = None):
+        if layers is None:
+            layers = self.layers
+        if layers > 0:
+            crawlThese = self.notCrawled
+            self.notCrawled = []
+            for link in crawlThese:
+                self.crawled.append(link)
+                print("Crawling: " + link)
+                try:
+                    response = urllib.request.urlopen(link)
+                except:
+                    print("Attempting to fetch URL \"" + link + "\" returned an error")
+                    pass
+                    continue
+                page = WebPage(response, filterUrl, genMapUrlFn(link))
+                self.pages.append(page)
+                for toCrawl in page.links:
+                    if toCrawl not in self.crawled:
+                        self.notCrawled.append(toCrawl)
+            self.crawl(layers - 1)

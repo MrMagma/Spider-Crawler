@@ -19,10 +19,9 @@ class XMLNode(object):
             matched[i] = XMLNode(matched[i])
         return matched
     def get(self, attr, defaultVal = None):
-        val = self._tree[attr]
-        if val == None:
+        if attr not in self._tree.attrs:
             return defaultVal
-        return val
+        return self._tree[attr]
     def _findByCSS(self, selector):
         # TODO (Joshua): Reimplement CSS style selectors
         # for css, xpath in rewrites:
