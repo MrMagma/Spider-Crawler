@@ -1,9 +1,6 @@
 from XML import XMLTree
 
-class WebPage(object):
-    def __init__(self, html):
-        self.rawHTML = html
-        self.parse()
-        
-    def parse(self):
-        print("Parsing page")
+class WebPage(XMLTree):
+    def __init__(self, content, filterUrl = lambda: True, mapUrl = lambda url: url):
+        super(WebPage, self).__init__(content)
+        self.links = map(mapUrl, filter(filterUrl, map(lambda el: el.get("href", ""), self.find("a"))))
